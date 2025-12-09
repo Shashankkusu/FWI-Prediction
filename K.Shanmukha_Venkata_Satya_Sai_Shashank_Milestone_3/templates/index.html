@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FWI Fire Risk Predictor</title>
+    
+    <!-- Favicon Configuration -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon/favicon.png') }}">
+    
+    <!-- Animated fire emoji as favicon fallback -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#ff4444">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Animated tab title with threshold indicator */
+        .tab-fire-animation {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Animation with 6.0 Threshold -->
+    <div class="intro-animation">
+        <div class="fire-risk-scanner">
+            <div class="scanner-beam"></div>
+            <div class="risk-radar">
+                <div class="radar-line"></div>
+                <div class="radar-dot safe" style="--angle: 45deg"></div>
+                <div class="radar-dot safe" style="--angle: 120deg"></div>
+                <div class="radar-dot safe" style="--angle: 180deg"></div>
+                <div class="radar-dot danger" style="--angle: 270deg"></div>
+                <div class="radar-dot safe" style="--angle: 300deg"></div>
+            </div>
+        </div>
+        
+        <div class="intro-content">
+            <div class="risk-meter-intro">
+                <div class="meter-threshold">
+                    <div class="threshold-line"></div>
+                    <div class="threshold-label">Risk Threshold: 6.0</div>
+                </div>
+                <div class="meter-scale">
+                    <div class="scale-segment safe">SAFE</div>
+                    <div class="scale-segment danger">HIGH RISK</div>
+                </div>
+            </div>
+            
+            <h1 class="intro-title">
+                <span class="title-part">FIRE RISK</span>
+                <span class="title-part">PREDICTION</span>
+                <span class="title-part">SYSTEM</span>
+            </h1>
+            
+            <p class="intro-subtitle">Advanced Fire Weather Index Analysis with 6.0 Threshold</p>
+            
+            <div class="model-info-intro">
+                <div class="model-chip">
+                    <i class="fas fa-cogs"></i>
+                    <span>Ridge Regression Model</span>
+                </div>
+                <div class="model-chip">
+                    <i class="fas fa-filter"></i>
+                    <span>Standard Scaler</span>
+                </div>
+                <div class="model-chip">
+                    <i class="fas fa-bolt"></i>
+                    <span>Threshold: 6.0</span>
+                </div>
+            </div>
+            
+            <div class="loading-sequence">
+                <div class="loading-step">
+                    <div class="step-icon"><i class="fas fa-database"></i></div>
+                    <div class="step-text">Loading Models</div>
+                    <div class="step-progress"></div>
+                </div>
+                <div class="loading-step">
+                    <div class="step-icon"><i class="fas fa-sliders-h"></i></div>
+                    <div class="step-text">Setting Threshold: 6.0</div>
+                    <div class="step-progress"></div>
+                </div>
+                <div class="loading-step">
+                    <div class="step-icon"><i class="fas fa-fire"></i></div>
+                    <div class="step-text">Ready for Risk Analysis</div>
+                    <div class="step-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-top">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-fire"></i>
+                        <div class="logo-glow"></div>
+                    </div>
+                    <div class="logo-text">
+                        <h1>FWI Risk Predictor</h1>
+                        <p class="tagline">6.0 Threshold Risk Assessment System</p>
+                    </div>
+                </div>
+                
+                <div class="system-status">
+                    <div class="status-item">
+                        <div class="status-indicator active"></div>
+                        <span>scaler.pkl</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator active"></div>
+                        <span>ridge_model.pkl</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator pulse"></div>
+                        <span>Threshold: 6.0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="risk-banner">
+                <div class="risk-indicator-global">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>System Status: <span id="globalStatus">OPERATIONAL</span></span>
+                </div>
+                <div class="threshold-display">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>FWI ≥ 6.0 = HIGH FIRE RISK</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="dashboard">
+            <!-- Left Panel: Input Form -->
+            <div class="panel input-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-sliders-h"></i> INPUT PARAMETERS</h2>
+                    <div class="parameter-count">9 Features Required</div>
+                </div>
+                
+                <div class="form-grid">
+                    <!-- Row 1 -->
+                    <div class="input-group">
+                        <label for="temperature">
+                            <i class="fas fa-thermometer-three-quarters"></i>
+                            <span>Temperature (°C)</span>
+                        </label>
+                        <input type="number" id="temperature" step="0.1" placeholder="e.g., 35" required>
+                        <div class="input-hint">Enter value between -50 to 400</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="rh">
+                            <i class="fas fa-tint"></i>
+                            <span>RH (%)</span>
+                        </label>
+                        <input type="number" id="rh" step="0.1" placeholder="e.g., 34" required>
+                        <div class="input-hint">Relative Humidity 0-100%</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ws">
+                            <i class="fas fa-wind"></i>
+                            <span>Ws (km/h)</span>
+                        </label>
+                        <input type="number" id="ws" step="0.1" placeholder="e.g., 17" required>
+                        <div class="input-hint">Wind Speed</div>
+                    </div>
+                    
+                    <!-- Row 2 -->
+                    <div class="input-group">
+                        <label for="rain">
+                            <i class="fas fa-cloud-rain"></i>
+                            <span>Rain (mm)</span>
+                        </label>
+                        <input type="number" id="rain" step="0.1" placeholder="e.g., 0.0" required>
+                        <div class="input-hint">Precipitation amount</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="ffmc">
+                            <i class="fas fa-fire"></i>
+                            <span>FFMC</span>
+                        </label>
+                        <input type="number" id="ffmc" step="0.1" placeholder="e.g., 92.2" required>
+                        <div class="input-hint">Fine Fuel Moisture Code</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="dmc">
+                            <i class="fas fa-leaf"></i>
+                            <span>DMC</span>
+                        </label>
+                        <input type="number" id="dmc" step="0.1" placeholder="e.g., 23.6" required>
+                        <div class="input-hint">Duff Moisture Code</div>
+                    </div>
+                    
+                    <!-- Row 3 -->
+                    <div class="input-group">
+                        <label for="dc">
+                            <i class="fas fa-tree"></i>
+                            <span>DC</span>
+                        </label>
+                        <input type="number" id="dc" step="0.1" placeholder="e.g., 97.3" required>
+                        <div class="input-hint">Drought Code</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="isi">
+                            <i class="fas fa-running"></i>
+                            <span>ISI</span>
+                        </label>
+                        <input type="number" id="isi" step="0.1" placeholder="e.g., 13.8" required>
+                        <div class="input-hint">Initial Spread Index</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="bui">
+                            <i class="fas fa-chart-line"></i>
+                            <span>BUI</span>
+                        </label>
+                        <input type="number" id="bui" step="0.1" placeholder="e.g., 29.4" required>
+                        <div class="input-hint">Buildup Index</div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="predictBtn" class="btn predict-btn">
+                        <i class="fas fa-bolt"></i>
+                        <span>PREDICT FWI</span>
+                        <div class="btn-glow"></div>
+                    </button>
+                    
+                    <div class="sample-buttons">
+                        <button class="btn sample-btn" data-sample="0">
+                            <i class="fas fa-vial"></i> Sample 1
+                        </button>
+                        <button class="btn sample-btn" data-sample="1">
+                            <i class="fas fa-vial"></i> Sample 2
+                        </button>
+                        <button class="btn sample-btn" data-sample="2">
+                            <i class="fas fa-vial"></i> Sample 3
+                        </button>
+                        <button class="btn sample-btn" data-sample="3">
+                            <i class="fas fa-vial"></i> Sample 4
+                        </button>
+                        <button class="btn sample-btn" data-sample="4">
+                            <i class="fas fa-vial"></i> Sample 5
+                        </button>
+                    </div>
+                    
+                    <button id="resetBtn" class="btn reset-btn">
+                        <i class="fas fa-redo"></i> Clear All
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Results -->
+            <div class="panel result-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-chart-bar"></i> PREDICTION RESULTS</h2>
+                    <div class="realtime-badge">
+                        <i class="fas fa-sync-alt"></i> Live Analysis
+                    </div>
+                </div>
+                
+                <div class="result-container">
+                    <!-- Placeholder State -->
+                    <div id="resultPlaceholder" class="result-placeholder">
+                        <div class="placeholder-icon">
+                            <i class="fas fa-fire-alt"></i>
+                            <div class="icon-pulse"></div>
+                        </div>
+                        <h3>Awaiting Analysis</h3>
+                        <p>Enter parameters and click "PREDICT FWI" to analyze fire risk</p>
+                        <div class="placeholder-info">
+                            <div class="info-card">
+                                <i class="fas fa-info-circle"></i>
+                                <p>System uses scaler.pkl + ridge_model.pkl for prediction</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results State -->
+                    <div id="resultContent" class="result-content" style="display: none;">
+                        <!-- Dynamic Score Board -->
+                        <div id="scoreBoard" class="score-board">
+                            <div class="score-header">
+                                <h3><i class="fas fa-fire"></i> FIRE WEATHER INDEX</h3>
+                                <div class="model-badge">
+                                    <i class="fas fa-sliders-h"></i>
+                                    <span>Threshold: 6.0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="score-display">
+                                <div class="score-value-container">
+                                    <div id="fwiScore" class="score-value">0.00</div>
+                                    <div class="score-label">FWI Score</div>
+                                </div>
+                                
+                                <div class="threshold-comparison">
+                                    <div class="threshold-value">Threshold: 6.0</div>
+                                    <div id="riskIndicator" class="risk-indicator">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>SAFE</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="risk-visualization">
+                                <div class="risk-bar">
+                                    <div class="bar-background"></div>
+                                    <div id="scoreBar" class="score-bar"></div>
+                                    <div class="threshold-marker">
+                                        <div class="marker-line"></div>
+                                        <div class="marker-label">6.0</div>
+                                    </div>
+                                    <div class="bar-labels">
+                                        <span>0</span>
+                                        <span>2</span>
+                                        <span>4</span>
+                                        <span>6</span>
+                                        <span>8</span>
+                                        <span>10+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="risk-assessment">
+                                <div class="assessment-card">
+                                    <div class="assessment-icon">
+                                        <i id="riskIcon" class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="assessment-content">
+                                        <h4 id="riskLevel">SAFE CONDITIONS</h4>
+                                        <p id="riskDescription">FWI score is below 6.0 threshold</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Model Processing Info -->
+                        <div class="model-process">
+                            <h4><i class="fas fa-cogs"></i> Model Processing Steps</h4>
+                            <div class="process-steps">
+                                <div class="process-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h5>Feature Scaling</h5>
+                                        <p>Input parameters normalized using scaler.pkl</p>
+                                    </div>
+                                </div>
+                                <div class="process-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h5>Prediction</h5>
+                                        <p>Ridge regression model (ridge_model.pkl) calculates FWI</p>
+                                    </div>
+                                </div>
+                                <div class="process-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h5>Risk Assessment</h5>
+                                        <p>Score compared against 6.0 threshold for risk classification</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Sample Data Table -->
+        <div class="sample-data-section">
+            <div class="section-header">
+                <h3><i class="fas fa-database"></i> SAMPLE DATASET</h3>
+                <div class="dataset-info">Click any row to load parameters</div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th><i class="fas fa-thermometer-half"></i> Temp</th>
+                            <th><i class="fas fa-tint"></i> RH</th>
+                            <th><i class="fas fa-wind"></i> Ws</th>
+                            <th><i class="fas fa-cloud-rain"></i> Rain</th>
+                            <th><i class="fas fa-fire"></i> FFMC</th>
+                            <th><i class="fas fa-leaf"></i> DMC</th>
+                            <th><i class="fas fa-tree"></i> DC</th>
+                            <th><i class="fas fa-running"></i> ISI</th>
+                            <th><i class="fas fa-chart-line"></i> BUI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-sample="0">
+                            <td>1</td>
+                            <td>35</td>
+                            <td>34</td>
+                            <td>17</td>
+                            <td>0.0</td>
+                            <td>92.2</td>
+                            <td>23.6</td>
+                            <td>97.3</td>
+                            <td>13.8</td>
+                            <td>29.4</td>
+                        </tr>
+                        <tr data-sample="1">
+                            <td>2</td>
+                            <td>28</td>
+                            <td>67</td>
+                            <td>19</td>
+                            <td>0</td>
+                            <td>75.4</td>
+                            <td>2.9</td>
+                            <td>16.3</td>
+                            <td>2</td>
+                            <td>4</td>
+                        </tr>
+                        <tr data-sample="2">
+                            <td>3</td>
+                            <td>39</td>
+                            <td>39</td>
+                            <td>15</td>
+                            <td>0.2</td>
+                            <td>89.3</td>
+                            <td>15.8</td>
+                            <td>35.4</td>
+                            <td>8.2</td>
+                            <td>15.8</td>
+                        </tr>
+                        <tr data-sample="3">
+                            <td>4</td>
+                            <td>32</td>
+                            <td>55</td>
+                            <td>14</td>
+                            <td>0</td>
+                            <td>86.2</td>
+                            <td>8.3</td>
+                            <td>18.4</td>
+                            <td>5</td>
+                            <td>8.2</td>
+                        </tr>
+                        <tr data-sample="4">
+                            <td>5</td>
+                            <td>37</td>
+                            <td>55</td>
+                            <td>15</td>
+                            <td>0</td>
+                            <td>89.3</td>
+                            <td>28.3</td>
+                            <td>67.2</td>
+                            <td>8.3</td>
+                            <td>28.3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="main-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="model-summary">
+                        <h4><i class="fas fa-microchip"></i> Model Information</h4>
+                        <div class="model-item">
+                            <i class="fas fa-file-code"></i>
+                            <span>scaler.pkl</span>
+                            <span class="model-status-badge active">Loaded</span>
+                        </div>
+                        <div class="model-item">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>ridge_model.pkl</span>
+                            <span class="model-status-badge active">Loaded</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <div class="risk-info">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Risk Classification (6.0 Threshold)</h4>
+                        <div class="risk-level">
+                            <div class="risk-dot safe"></div>
+                            <span>FWI < 6.0: SAFE</span>
+                        </div>
+                        <div class="risk-level">
+                            <div class="risk-dot danger"></div>
+                            <span>FWI ≥ 6.0: HIGH RISK</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <div class="system-status-footer">
+                        <h4><i class="fas fa-server"></i> System Status</h4>
+                        <div class="status-item">
+                            <div class="status-indicator active"></div>
+                            <span>API: Operational</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator active"></div>
+                            <span>Models: Ready</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-indicator pulse"></div>
+                            <span>Threshold: 6.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2024 FWI Fire Risk Prediction System | 6.0 Threshold Risk Assessment | Dual-Model Architecture</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
