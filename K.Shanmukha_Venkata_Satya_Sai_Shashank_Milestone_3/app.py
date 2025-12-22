@@ -20,7 +20,7 @@ gemini_client = None  # New: Gemini client
 THRESHOLD = 6.0
 
 # Gemini API Configuration
-GEMINI_API_KEY = ('AIzaSyBmwR9UL58KXGAIHG7cmF2QssBfyrh6w3s')
+GEMINI_API_KEY = ('******************')
 GEMINI_MODEL = "gemini-2.5-pro"  # You can use "gemini-2.0-flash" for faster responses[citation:1]
 
 # System prompt for FWI chatbot[citation:10]
@@ -324,4 +324,5 @@ def health():
 if __name__ == '__main__':
     # Load models on startup
     load_models()
+
     app.run(debug=True, port=5000)
